@@ -25,6 +25,15 @@ var usbProduct = new Product('images/usb.gif', 'Tentacle usb moves when in use.'
 var watercanProduct = new Product('images/water-can.jpg', 'Never run out of water with this can,', 'Watercan');
 var wineglassProduct = new Product('images/wine-glass.jpg', 'Perfect oxygenation in every glass.', 'Wineglass');
 
+// Local Storage
+var stringifiedProductsFromStorage = localStorage.getItem('storedProducts');
+var productsFromStorage = JSON.parse(stringifiedProductsFromStorage);
+console.log('products from storage: ', productsFromStorage);
+
+if(productsFromStorage){
+  Product.collection = productsFromStorage;
+}
+
 //=================Functions=================//
 
 function Product(source, description, name){

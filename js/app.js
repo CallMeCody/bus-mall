@@ -3,6 +3,10 @@
 Product.collection = [];
 var totalClicks = 0;
 var maxClicks = 25;
+var firstPrev;
+var secondPrev;
+var thirdPrev;
+
 //=================Objects==================//
 var bathProduct = new Product('images/bathroom.jpg', 'iPad while you iPoo', 'Bathroom iPad Multitool');
 var petSweeperProduct = new Product('images/pet-sweep.jpg', 'Put your pets to work as they run around your house with snap on sweepers.', 'Pet Sweeper');
@@ -25,9 +29,9 @@ var usbProduct = new Product('images/usb.gif', 'Tentacle usb moves when in use.'
 var watercanProduct = new Product('images/water-can.jpg', 'Never run out of water with this can,', 'Watercan');
 var wineglassProduct = new Product('images/wine-glass.jpg', 'Perfect oxygenation in every glass.', 'Wineglass');
 
-// Local Storage
-var stringifiedProductsFromStorage = localStorage.getItem('storedProducts');
-var productsFromStorage = JSON.parse(stringifiedProductsFromStorage);
+// Local storage
+var stringyProductsFromStorage = localStorage.getItem('storedProducts');
+var productsFromStorage = JSON.parse(stringyProductsFromStorage);
 console.log('products from storage: ', productsFromStorage);
 
 if(productsFromStorage){
@@ -35,7 +39,6 @@ if(productsFromStorage){
 }
 
 //=================Functions=================//
-
 function Product(source, description, name){
   this.clicked = 0;
   this.shown = 0;
@@ -49,6 +52,7 @@ function Product(source, description, name){
 var productImageSelection = document.getElementById('productImages');
 productImageSelection.addEventListener('click', handleImageClick);
 
+// Event Listener
 function handleImageClick(event){
   if(event.target.tagName === 'IMG') {
     totalClicks++;
@@ -63,18 +67,23 @@ function handleImageClick(event){
       }
     }
     rerenderProductSelection();
-    // Render
+    // Render new Images
     if (totalClicks === maxClicks){
       productImageSelection.removeEventListener('click', handleImageClick);
       getSummary();
       createChart();
     }
 
+    var stringyProductCollection = JSON.stringify(Product.collection);
+    // console.log('stringy array',stringyProductCollection);
+    localStorage.setItem('storedProducts', stringyProductCollection);
+
   }
   else
   alert('click on an image to make a selection.');
 }
 
+//shows totals at end
 function getSummary(){
   var totals = document.getElementById('totals');
   for (var i in Product.collection){
@@ -83,20 +92,36 @@ function getSummary(){
     totals.appendChild(listItem);
   }
 }
-
+//Rerender Images shown
 function rerenderProductSelection(){
+  console.log('collection', Product.collection);
   var firstRandom = randomProduct(0, Product.collection.length);
   var secondRandom = randomProduct(0, Product.collection.length);
   var thirdRandom = randomProduct(0, Product.collection.length);
+  
+  do {
+    firstRandom = randomProduct(0, Product.collection.length);
+  } while (firstRandom === secondRandom || firstRandom === thirdRandom || firstRandom === firstPrev || firstRandom === secondPrev || firstRandom === thirdPrev);
 
-  while(secondRandom === firstRandom || secondRandom === thirdRandom){
+  do {
     secondRandom = randomProduct(0, Product.collection.length);
-    // console.log('second image ', Product.collection[secondRandom]);
-  }
-  while(thirdRandom === firstRandom || secondRandom === thirdRandom){
+  } while (secondRandom === firstRandom || secondRandom === thirdRandom || secondRandom === firstPrev || secondRandom === secondPrev || secondRandom === thirdPrev);
+    
+  do {
     thirdRandom = randomProduct(0, Product.collection.length);
-    // console.log('third image ', Product.collection[thirdRandom]);
-  }
+  } while (thirdRandom === firstRandom || thirdRandom === secondRandom || thirdRandom === firstPrev || thirdRandom === secondPrev || thirdRandom === thirdPrev);
+
+  // console.log('random 1',firstRandom);
+  // console.log('random 2',secondRandom);
+  // console.log('random 3',thirdRandom);
+    
+  firstPrev = firstRandom;
+  secondPrev = secondRandom;
+  thirdPrev = thirdRandom;
+
+  // console.log('random 1 Prev',firstPrev);
+  // console.log('random 2 Prev',secondPrev);
+  // console.log('random 3 Prev',thirdPrev);
 
   var firstImage = document.getElementById('image1');
   var firstText = document.getElementById('text1');
@@ -120,6 +145,7 @@ function rerenderProductSelection(){
   thirdProduct.shown++;
 }
 
+//Randomizer
 function randomProduct(min, max){
   return Math.floor(Math.random() * (max - min) + min);
 }
@@ -128,21 +154,13 @@ function randomProduct(min, max){
 
 function createChart(){
   var chartNames = [];
-  for(var i = 0; i < Product.collection.length; i++){
-    chartNames.push(Product.collection[i].productName);
-    console.log('chart names :', chartNames);
-  }
-
   var chartProductClicks = [];
-  for(var i = 0; i < Product.collection.length; i++){
-    chartProductClicks.push(Product.collection[i].clicked);
-    console.log('chart clicks :',chartProductClicks);
-  }
-
   var chartProductShown = [];
   for(var i = 0; i < Product.collection.length; i++){
+    chartNames.push(Product.collection[i].productName);
+    chartProductClicks.push(Product.collection[i].clicked);
     chartProductShown.push(Product.collection[i].shown);
-    console.log('chart shown :', chartProductShown);
+    // console.log('chart names :', chartNames);
   }
 
   var ctx = document.getElementById('productChart').getContext('2d');
